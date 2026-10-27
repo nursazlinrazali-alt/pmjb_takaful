@@ -1,12 +1,203 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Takaful Pelajar PMJB</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/print.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Takaful Pelajar PMJB</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ============================================================
+   Dashboard Takaful Pelajar PMJB — Gaya Utama
+   ============================================================ */
+:root {
+  --biru-gelap:   #1a3a5c;
+  --biru-sedang:  #1e5799;
+  --biru-cerah:   #2980b9;
+  --hijau:        #27ae60;
+  --oren:         #e67e22;
+  --merah:        #e74c3c;
+  --ungu:         #8e44ad;
+  --kelabu-gelap: #57606a;
+  --kelabu:       #95a5a6;
+  --kelabu-cerah: #ecf0f1;
+  --putih:        #ffffff;
+  --latar:        #f4f6f9;
+  --sempadan:     #dce1e7;
+  --teks-gelap:   #1f2328;
+  --teks-sedang:  #444d56;
+  --sidebar-lebar: 240px;
+  --header-tinggi: 60px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,"Segoe UI",system-ui,sans-serif; font-size:14px; line-height:1.6; color:var(--teks-gelap); background:var(--latar); }
+
+/* Header */
+.header { position:fixed; top:0; left:0; right:0; height:var(--header-tinggi); background:var(--biru-gelap); color:var(--putih); display:flex; align-items:center; justify-content:space-between; padding:0 20px; z-index:1000; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+.header-kiri { display:flex; align-items:center; gap:12px; }
+.header-logo { width:36px; height:36px; background:var(--biru-cerah); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; }
+.header-tajuk { font-size:15px; font-weight:600; }
+.header-subjudul { font-size:11px; opacity:0.75; }
+.header-kanan { display:flex; align-items:center; gap:10px; font-size:13px; flex-wrap:wrap; }
+.semester-badge { background:rgba(255,255,255,0.15); padding:4px 10px; border-radius:20px; font-size:12px; }
+
+/* Sidebar */
+.sidebar { position:fixed; top:var(--header-tinggi); left:0; bottom:0; width:var(--sidebar-lebar); background:var(--putih); border-right:1px solid var(--sempadan); overflow-y:auto; z-index:900; transition:transform 0.25s ease; display:flex; flex-direction:column; }
+.sidebar-bahagian { padding:16px 0 4px; }
+.sidebar-label { padding:0 16px 6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--kelabu); }
+.nav-item { display:flex; align-items:center; gap:10px; padding:10px 16px; color:var(--teks-sedang); text-decoration:none; border-left:3px solid transparent; transition:all 0.15s; cursor:pointer; font-size:13.5px; }
+.nav-item:hover { background:var(--latar); color:var(--biru-sedang); }
+.nav-item.aktif { background:#e8f4fd; color:var(--biru-sedang); border-left-color:var(--biru-sedang); font-weight:600; }
+.nav-ikon { font-size:16px; width:20px; text-align:center; }
+.nav-lencana { margin-left:auto; background:var(--merah); color:var(--putih); font-size:10px; padding:1px 6px; border-radius:10px; font-weight:700; min-width:18px; text-align:center; }
+.sidebar-bawah { margin-top:auto; padding:12px 16px; border-top:1px solid var(--sempadan); }
+
+/* Kandungan */
+.kandungan { margin-left:var(--sidebar-lebar); margin-top:var(--header-tinggi); padding:24px; min-height:calc(100vh - var(--header-tinggi)); }
+.halaman { display:none; }
+.halaman.aktif { display:block; }
+
+/* Tajuk Halaman */
+.halaman-tajuk { margin-bottom:24px; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.halaman-tajuk h1 { font-size:20px; font-weight:700; color:var(--biru-gelap); }
+.halaman-tajuk p { font-size:13px; color:var(--kelabu-gelap); margin-top:2px; }
+
+/* Kad */
+.grid-kad { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:24px; }
+.kad { background:var(--putih); border-radius:10px; padding:18px 20px; border:1px solid var(--sempadan); transition:box-shadow 0.2s; }
+.kad:hover { box-shadow:0 3px 10px rgba(0,0,0,0.08); }
+.kad-ikon { font-size:24px; margin-bottom:8px; }
+.kad-nilai { font-size:28px; font-weight:700; color:var(--biru-gelap); line-height:1; }
+.kad-label { font-size:12px; color:var(--kelabu-gelap); margin-top:4px; }
+.kad.hijau .kad-nilai { color:var(--hijau); }
+.kad.merah .kad-nilai { color:var(--merah); }
+.kad.oren .kad-nilai { color:var(--oren); }
+.kad.ungu .kad-nilai { color:var(--ungu); }
+
+/* Panel */
+.panel { background:var(--putih); border-radius:10px; border:1px solid var(--sempadan); margin-bottom:20px; overflow:hidden; }
+.panel-kepala { padding:14px 20px; border-bottom:1px solid var(--sempadan); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.panel-kepala h2 { font-size:15px; font-weight:600; color:var(--biru-gelap); }
+.panel-badan { padding:20px; }
+
+/* Butang */
+.btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:6px; border:none; cursor:pointer; font-size:13px; font-weight:500; transition:opacity 0.15s; text-decoration:none; white-space:nowrap; }
+.btn:hover { opacity:0.88; }
+.btn-utama   { background:var(--biru-sedang); color:var(--putih); }
+.btn-berjaya { background:var(--hijau);        color:var(--putih); }
+.btn-bahaya  { background:var(--merah);         color:var(--putih); }
+.btn-amaran  { background:var(--oren);          color:var(--putih); }
+.btn-biasa   { background:var(--kelabu-cerah);  color:var(--teks-gelap); border:1px solid var(--sempadan); }
+.btn-kecil   { padding:4px 10px; font-size:12px; }
+
+/* Lencana */
+.lencana { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
+.lencana-aktif   { background:#d4edda; color:#155724; }
+.lencana-repeat  { background:#fdebd0; color:#784212; }
+.lencana-extend  { background:#d6eaf8; color:#154360; }
+.lencana-junior  { background:#e8daef; color:#4a235a; }
+.lencana-tangguh { background:#eaecee; color:#424949; }
+.lencana-bayar   { background:#d4edda; color:#155724; }
+.lencana-belum   { background:#f8d7da; color:#721c24; }
+.lencana-tunggu  { background:#fff3cd; color:#856404; }
+.lencana-kecuali { background:#d6eaf8; color:#154360; }
+
+/* Carian & Penapis */
+.bar-carian { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+.input-carian { flex:1; min-width:200px; padding:8px 12px; border:1px solid var(--sempadan); border-radius:6px; font-size:13px; outline:none; transition:border-color 0.15s; }
+.input-carian:focus { border-color:var(--biru-cerah); }
+.pilih-penapis { padding:8px 12px; border:1px solid var(--sempadan); border-radius:6px; font-size:13px; background:var(--putih); outline:none; cursor:pointer; min-width:140px; }
+
+/* Jadual */
+.jadual-balut { overflow-x:auto; }
+.jadual { width:100%; border-collapse:collapse; font-size:13px; }
+.jadual th { background:var(--latar); padding:10px 14px; text-align:left; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:var(--kelabu-gelap); border-bottom:1px solid var(--sempadan); white-space:nowrap; }
+.jadual td { padding:10px 14px; border-bottom:1px solid var(--sempadan); vertical-align:middle; }
+.jadual tr:last-child td { border-bottom:none; }
+.jadual tr:hover td { background:#f8f9fa; }
+.jadual .pautan-pelajar { color:var(--biru-sedang); cursor:pointer; font-weight:500; }
+.jadual .pautan-pelajar:hover { text-decoration:underline; }
+.kelas-asal { font-size:11px; color:var(--kelabu-gelap); display:block; font-style:italic; }
+
+/* Modal */
+.modal-latar { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+.modal-latar.buka { display:flex; }
+.modal-kotak { background:var(--putih); border-radius:12px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+.modal-kepala { padding:18px 24px; border-bottom:1px solid var(--sempadan); display:flex; align-items:center; justify-content:space-between; }
+.modal-kepala h3 { font-size:16px; font-weight:700; color:var(--biru-gelap); }
+.modal-tutup { background:none; border:none; cursor:pointer; font-size:20px; color:var(--kelabu-gelap); line-height:1; padding:4px; border-radius:4px; }
+.modal-tutup:hover { background:var(--latar); }
+.modal-badan { padding:24px; }
+.modal-kaki { padding:16px 24px; border-top:1px solid var(--sempadan); display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+
+/* Borang */
+.kumpulan-borang { margin-bottom:16px; }
+.kumpulan-borang label { display:block; font-size:12px; font-weight:600; color:var(--teks-sedang); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.03em; }
+.kawalan-borang { width:100%; padding:8px 12px; border:1px solid var(--sempadan); border-radius:6px; font-size:13px; outline:none; background:var(--putih); transition:border-color 0.15s; }
+.kawalan-borang:focus { border-color:var(--biru-cerah); }
+.grid-borang-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.grid-borang-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+textarea.kawalan-borang { resize:vertical; min-height:70px; }
+
+/* Upload Resit */
+.zon-upload { border:2px dashed var(--sempadan); border-radius:8px; padding:24px; text-align:center; cursor:pointer; transition:border-color 0.2s,background 0.2s; }
+.zon-upload:hover { border-color:var(--biru-cerah); background:#f0f7ff; }
+.zon-upload.ada-fail { border-color:var(--hijau); background:#f0fff4; }
+.zon-upload-ikon { font-size:32px; margin-bottom:8px; }
+.zon-upload p { font-size:13px; color:var(--kelabu-gelap); }
+.zon-upload small { font-size:11px; color:var(--kelabu); }
+
+/* Wizard */
+.wizard-langkah { display:flex; margin-bottom:28px; border-radius:8px; overflow:hidden; border:1px solid var(--sempadan); }
+.wizard-item { flex:1; padding:12px 16px; background:var(--latar); text-align:center; font-size:12px; font-weight:600; color:var(--kelabu-gelap); border-right:1px solid var(--sempadan); }
+.wizard-item:last-child { border-right:none; }
+.wizard-item.aktif { background:var(--biru-sedang); color:var(--putih); }
+.wizard-item.selesai { background:var(--hijau); color:var(--putih); }
+.wizard-nombor { font-size:18px; font-weight:700; display:block; }
+.wizard-panel { display:none; }
+.wizard-panel.aktif { display:block; }
+
+/* Carta */
+.grid-carta { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.carta-balut { position:relative; height:260px; }
+
+/* Amaran */
+.kotak-amaran { padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:13px; display:flex; gap:10px; align-items:flex-start; }
+.kotak-amaran.kuning { background:#fff8e1; border:1px solid #f9c54a; color:#7d5a00; }
+.kotak-amaran.merah  { background:#fdecea; border:1px solid #f28b82; color:#7d1b0c; }
+.kotak-amaran.hijau  { background:#e6f4ea; border:1px solid #81c995; color:#1e4620; }
+.kotak-amaran.biru   { background:#e8f4fd; border:1px solid #7ab4e8; color:#0d3a6e; }
+.kotak-amaran-ikon   { font-size:16px; flex-shrink:0; }
+
+/* Log */
+.item-log { padding:10px 0; border-bottom:1px solid var(--sempadan); font-size:13px; display:flex; gap:12px; align-items:flex-start; }
+.item-log:last-child { border-bottom:none; }
+.log-masa { font-size:11px; color:var(--kelabu); white-space:nowrap; margin-top:2px; }
+
+/* Tiada Data */
+.tiada-data { text-align:center; padding:40px 20px; color:var(--kelabu-gelap); }
+.tiada-data-ikon { font-size:40px; margin-bottom:10px; }
+.tiada-data p { font-size:14px; }
+
+/* Responsif */
+@media (max-width:900px) {
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.buka { transform:translateX(0); }
+  .kandungan { margin-left:0; }
+  .grid-carta { grid-template-columns:1fr; }
+  .grid-borang-3 { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:600px) {
+  .grid-borang-2,.grid-borang-3 { grid-template-columns:1fr; }
+  .kandungan { padding:16px; }
+}
+@media print {
+  .sidebar,.header,.bar-carian,.btn { display:none !important; }
+  .kandungan { margin-left:0 !important; margin-top:0 !important; padding:0 !important; }
+  body { background:white; font-size:12px; }
+  .panel { border:1px solid #ccc; page-break-inside:avoid; }
+  .grid-kad { grid-template-columns:repeat(3,1fr); }
+}
+</style>
 </head>
 <body>
 
@@ -53,442 +244,208 @@
       <span class="nav-ikon">🗓️</span> Semester
     </a>
   </div>
-  <div class="sidebar-bahagian" style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--sempadan)">
-    <p style="font-size:11px;color:var(--kelabu)">Data disimpan dalam browser ini.</p>
-    <button class="btn btn-biasa btn-kecil" style="margin-top:8px;width:100%" onclick="eksport_csv()">📋 Eksport CSV</button>
-    <button class="btn btn-biasa btn-kecil" style="margin-top:6px;width:100%" onclick="buka_import_csv_bayaran()">📥 Import CSV Bayaran</button>
+  <div class="sidebar-bawah">
+    <p style="font-size:11px;color:var(--kelabu);margin-bottom:8px">Data disimpan dalam browser ini.</p>
+    <button class="btn btn-biasa btn-kecil" style="width:100%;margin-bottom:6px" onclick="eksport_csv()">📋 Eksport CSV</button>
+    <button class="btn btn-biasa btn-kecil" style="width:100%" onclick="buka_import_csv_bayaran()">📥 Import CSV Bayaran</button>
   </div>
 </nav>
 
 <!-- ===== KANDUNGAN UTAMA ===== -->
 <main class="kandungan">
 
-  <!-- ===== HALAMAN: DASHBOARD ===== -->
+  <!-- HALAMAN: DASHBOARD -->
   <section id="halaman-dashboard" class="halaman">
     <div class="halaman-tajuk">
-      <div>
-        <h1>📊 Dashboard</h1>
-        <p id="info-semester">Memuatkan maklumat semester...</p>
-      </div>
+      <div><h1>📊 Dashboard</h1><p id="info-semester">Memuatkan...</p></div>
       <button class="btn btn-biasa" onclick="window.print()">🖨 Jana Laporan PDF</button>
     </div>
-
-    <!-- Kad Statistik -->
     <div class="grid-kad">
-      <div class="kad">
-        <div class="kad-ikon">👨‍🎓</div>
-        <div class="kad-nilai" id="kad-jumlah">—</div>
-        <div class="kad-label">Jumlah Pelajar</div>
-      </div>
-      <div class="kad hijau">
-        <div class="kad-ikon">✅</div>
-        <div class="kad-nilai" id="kad-bayar">—</div>
-        <div class="kad-label">Sudah Bayar</div>
-      </div>
-      <div class="kad merah">
-        <div class="kad-ikon">❌</div>
-        <div class="kad-nilai" id="kad-belum">—</div>
-        <div class="kad-label">Belum / Tunggu Bayar</div>
-      </div>
-      <div class="kad oren">
-        <div class="kad-ikon">⏳</div>
-        <div class="kad-nilai" id="kad-tunggu">—</div>
-        <div class="kad-label">Tunggu Pengesahan</div>
-      </div>
-      <div class="kad oren">
-        <div class="kad-ikon">⚠️</div>
-        <div class="kad-nilai" id="kad-bermasalah">—</div>
-        <div class="kad-label">Pelajar Tercicir</div>
-      </div>
-      <div class="kad ungu">
-        <div class="kad-ikon">🔄</div>
-        <div class="kad-nilai" id="kad-repeat">—</div>
-        <div class="kad-label">Pelajar Repeat</div>
-      </div>
+      <div class="kad"><div class="kad-ikon">👨‍🎓</div><div class="kad-nilai" id="kad-jumlah">—</div><div class="kad-label">Jumlah Pelajar</div></div>
+      <div class="kad hijau"><div class="kad-ikon">✅</div><div class="kad-nilai" id="kad-bayar">—</div><div class="kad-label">Sudah Bayar</div></div>
+      <div class="kad merah"><div class="kad-ikon">❌</div><div class="kad-nilai" id="kad-belum">—</div><div class="kad-label">Belum / Tunggu Bayar</div></div>
+      <div class="kad oren"><div class="kad-ikon">⏳</div><div class="kad-nilai" id="kad-tunggu">—</div><div class="kad-label">Tunggu Pengesahan</div></div>
+      <div class="kad oren"><div class="kad-ikon">⚠️</div><div class="kad-nilai" id="kad-bermasalah">—</div><div class="kad-label">Pelajar Tercicir</div></div>
+      <div class="kad ungu"><div class="kad-ikon">🔄</div><div class="kad-nilai" id="kad-repeat">—</div><div class="kad-label">Pelajar Repeat</div></div>
     </div>
-
-    <!-- Carta -->
     <div class="grid-carta">
-      <div class="panel">
-        <div class="panel-kepala"><h2>Status Takaful</h2></div>
-        <div class="panel-badan">
-          <div class="carta-balut"><canvas id="carta-takaful"></canvas></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-kepala"><h2>Status Pengajian</h2></div>
-        <div class="panel-badan">
-          <div class="carta-balut"><canvas id="carta-pengajian"></canvas></div>
-        </div>
-      </div>
+      <div class="panel"><div class="panel-kepala"><h2>Status Takaful</h2></div><div class="panel-badan"><div class="carta-balut"><canvas id="carta-takaful"></canvas></div></div></div>
+      <div class="panel"><div class="panel-kepala"><h2>Status Pengajian</h2></div><div class="panel-badan"><div class="carta-balut"><canvas id="carta-pengajian"></canvas></div></div></div>
     </div>
-
-    <!-- Perlu Perhatian Segera -->
     <div class="panel">
-      <div class="panel-kepala">
-        <h2>⚠️ Perlu Perhatian Segera</h2>
-        <button class="btn btn-amaran btn-kecil" onclick="navigasi('perhatian')">Lihat Semua →</button>
-      </div>
+      <div class="panel-kepala"><h2>⚠️ Perlu Perhatian Segera</h2><button class="btn btn-amaran btn-kecil" onclick="navigasi('perhatian')">Lihat Semua →</button></div>
       <div class="panel-badan" id="senarai-perhatian-dash"></div>
     </div>
   </section>
 
-  <!-- ===== HALAMAN: PELAJAR ===== -->
+  <!-- HALAMAN: PELAJAR -->
   <section id="halaman-pelajar" class="halaman">
     <div class="halaman-tajuk">
-      <div>
-        <h1>👨‍🎓 Senarai Pelajar</h1>
-        <p>Urus rekod pelajar — <span id="bil-dipapar">0</span> dipapar daripada <span id="bil-jumlah">0</span> pelajar</p>
-      </div>
+      <div><h1>👨‍🎓 Senarai Pelajar</h1><p>Urus rekod pelajar — <span id="bil-dipapar">0</span> dipapar daripada <span id="bil-jumlah">0</span> pelajar</p></div>
       <button class="btn btn-utama" onclick="buka_tambah_pelajar()">+ Tambah Pelajar</button>
     </div>
-
-    <!-- Carian & Penapis -->
     <div class="bar-carian">
       <input type="text" id="carian-pelajar" class="input-carian" placeholder="🔍  Cari nama, no. matrik, atau PA...">
       <select id="penapis-pengajian" class="pilih-penapis">
         <option value="">Semua Status Pengajian</option>
-        <option value="aktif">Aktif</option>
-        <option value="repeat">Repeat</option>
-        <option value="extend">Extend</option>
-        <option value="junior">Junior</option>
-        <option value="tangguh">Tangguh</option>
+        <option value="aktif">Aktif</option><option value="repeat">Repeat</option>
+        <option value="extend">Extend</option><option value="junior">Junior</option><option value="tangguh">Tangguh</option>
       </select>
       <select id="penapis-takaful" class="pilih-penapis">
         <option value="">Semua Status Takaful</option>
-        <option value="bayar">Sudah Bayar</option>
-        <option value="belum_bayar">Belum Bayar</option>
-        <option value="tunggu">Tunggu Pengesahan</option>
-        <option value="pengecualian">Pengecualian</option>
+        <option value="bayar">Sudah Bayar</option><option value="belum_bayar">Belum Bayar</option>
+        <option value="tunggu">Tunggu Pengesahan</option><option value="pengecualian">Pengecualian</option>
       </select>
       <select id="penapis-program" class="pilih-penapis">
         <option value="">Semua Program</option>
-        <option value="DKM">DKM</option>
-        <option value="DIT">DIT</option>
-        <option value="DAT">DAT</option>
+        <option value="DKM">DKM</option><option value="DIT">DIT</option><option value="DAT">DAT</option>
       </select>
     </div>
-
-    <!-- Jadual Pelajar -->
     <div class="panel">
       <div class="jadual-balut">
         <table class="jadual">
-          <thead>
-            <tr>
-              <th>No. Matrik</th>
-              <th>Nama Pelajar</th>
-              <th>Program</th>
-              <th>Kelas Semasa</th>
-              <th>Status Pengajian</th>
-              <th>Status Takaful</th>
-              <th>Penasihat Akademik</th>
-              <th>Tindakan</th>
-            </tr>
-          </thead>
-          <tbody id="jadual-pelajar-badan">
-            <tr><td colspan="8"><div class="tiada-data"><div class="tiada-data-ikon">⏳</div><p>Memuatkan data...</p></div></td></tr>
-          </tbody>
+          <thead><tr><th>No. Matrik</th><th>Nama Pelajar</th><th>Program</th><th>Kelas Semasa</th><th>Status Pengajian</th><th>Status Takaful</th><th>Penasihat Akademik</th><th>Tindakan</th></tr></thead>
+          <tbody id="jadual-pelajar-badan"><tr><td colspan="8"><div class="tiada-data"><div class="tiada-data-ikon">⏳</div><p>Memuatkan data...</p></div></td></tr></tbody>
         </table>
       </div>
     </div>
   </section>
 
-  <!-- ===== HALAMAN: PEMBAYARAN ===== -->
+  <!-- HALAMAN: PEMBAYARAN -->
   <section id="halaman-pembayaran" class="halaman">
     <div class="halaman-tajuk">
-      <div>
-        <h1>💳 Pembayaran Takaful</h1>
-        <p>Urus rekod bayaran dan pengesahan resit pelajar</p>
-      </div>
+      <div><h1>💳 Pembayaran Takaful</h1><p>Urus rekod bayaran dan pengesahan resit pelajar</p></div>
       <button class="btn btn-biasa" onclick="eksport_belum_bayar_csv()">📋 Eksport Belum Bayar</button>
     </div>
-
-    <!-- Menunggu Pengesahan -->
     <div class="panel">
-      <div class="panel-kepala">
-        <h2>⏳ Menunggu Pengesahan Resit (<span id="bil-tunggu-sahkan">0</span>)</h2>
-      </div>
+      <div class="panel-kepala"><h2>⏳ Menunggu Pengesahan Resit (<span id="bil-tunggu-sahkan">0</span>)</h2></div>
       <div class="panel-badan" id="senarai-tunggu-sahkan"></div>
     </div>
-
-    <!-- Belum Bayar -->
     <div class="panel">
-      <div class="panel-kepala">
-        <h2>❌ Belum Bayar (<span id="bil-belum-bayar-pay">0</span>)</h2>
-      </div>
+      <div class="panel-kepala"><h2>❌ Belum Bayar (<span id="bil-belum-bayar-pay">0</span>)</h2></div>
       <div class="panel-badan" id="senarai-belum-bayar-pay"></div>
     </div>
   </section>
 
-  <!-- ===== HALAMAN: PERHATIAN ===== -->
+  <!-- HALAMAN: PERHATIAN -->
   <section id="halaman-perhatian" class="halaman">
     <div class="halaman-tajuk">
-      <div>
-        <h1>⚠️ Pelajar Perlu Perhatian</h1>
-        <p>Senarai pelajar mengikut kategori yang memerlukan tindakan</p>
-      </div>
+      <div><h1>⚠️ Pelajar Perlu Perhatian</h1><p>Senarai pelajar mengikut kategori yang memerlukan tindakan</p></div>
       <button class="btn btn-biasa" onclick="eksport_belum_bayar_csv()">📋 Eksport Belum Bayar</button>
     </div>
-
-    <!-- Belum Bayar -->
     <div class="panel">
-      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-belum-wrap')">
-        <h2><span style="color:var(--merah)">❌</span> Belum Bayar Takaful (<span id="bil-perhatian-belum">0</span>)</h2>
-        <span style="color:var(--kelabu)">▼</span>
-      </div>
-      <div id="perhatian-belum-wrap" class="panel-badan">
-        <div id="perhatian-belum"></div>
-      </div>
+      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-belum-wrap')"><h2><span style="color:var(--merah)">❌</span> Belum Bayar Takaful (<span id="bil-perhatian-belum">0</span>)</h2><span style="color:var(--kelabu)">▼</span></div>
+      <div id="perhatian-belum-wrap" class="panel-badan"><div id="perhatian-belum"></div></div>
     </div>
-
-    <!-- Repeat -->
     <div class="panel">
-      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-repeat-wrap')">
-        <h2><span style="color:var(--oren)">⚠</span> Pelajar Repeat (<span id="bil-perhatian-repeat">0</span>)</h2>
-        <span style="color:var(--kelabu)">▼</span>
-      </div>
-      <div id="perhatian-repeat-wrap" class="panel-badan">
-        <div id="perhatian-repeat"></div>
-      </div>
+      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-repeat-wrap')"><h2><span style="color:var(--oren)">⚠</span> Pelajar Repeat (<span id="bil-perhatian-repeat">0</span>)</h2><span style="color:var(--kelabu)">▼</span></div>
+      <div id="perhatian-repeat-wrap" class="panel-badan"><div id="perhatian-repeat"></div></div>
     </div>
-
-    <!-- Extend -->
     <div class="panel">
-      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-extend-wrap')">
-        <h2><span style="color:var(--biru-cerah)">↗</span> Pelajar Extend (<span id="bil-perhatian-extend">0</span>)</h2>
-        <span style="color:var(--kelabu)">▼</span>
-      </div>
-      <div id="perhatian-extend-wrap" class="panel-badan">
-        <div id="perhatian-extend"></div>
-      </div>
+      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-extend-wrap')"><h2><span style="color:var(--biru-cerah)">↗</span> Pelajar Extend (<span id="bil-perhatian-extend">0</span>)</h2><span style="color:var(--kelabu)">▼</span></div>
+      <div id="perhatian-extend-wrap" class="panel-badan"><div id="perhatian-extend"></div></div>
     </div>
-
-    <!-- Junior -->
     <div class="panel">
-      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-junior-wrap')">
-        <h2><span style="color:var(--ungu)">↓</span> Masuk Kelas Junior (<span id="bil-perhatian-junior">0</span>)</h2>
-        <span style="color:var(--kelabu)">▼</span>
-      </div>
-      <div id="perhatian-junior-wrap" class="panel-badan">
-        <div id="perhatian-junior"></div>
-      </div>
+      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-junior-wrap')"><h2><span style="color:var(--ungu)">↓</span> Masuk Kelas Junior (<span id="bil-perhatian-junior">0</span>)</h2><span style="color:var(--kelabu)">▼</span></div>
+      <div id="perhatian-junior-wrap" class="panel-badan"><div id="perhatian-junior"></div></div>
     </div>
-
-    <!-- Tangguh -->
     <div class="panel">
-      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-tangguh-wrap')">
-        <h2><span style="color:var(--kelabu-gelap)">⏸</span> Pelajar Tangguh (<span id="bil-perhatian-tangguh">0</span>)</h2>
-        <span style="color:var(--kelabu)">▼</span>
-      </div>
-      <div id="perhatian-tangguh-wrap" class="panel-badan">
-        <div id="perhatian-tangguh"></div>
-      </div>
+      <div class="panel-kepala" style="cursor:pointer" onclick="togol_seksyen('perhatian-tangguh-wrap')"><h2><span style="color:var(--kelabu-gelap)">⏸</span> Pelajar Tangguh (<span id="bil-perhatian-tangguh">0</span>)</h2><span style="color:var(--kelabu)">▼</span></div>
+      <div id="perhatian-tangguh-wrap" class="panel-badan"><div id="perhatian-tangguh"></div></div>
     </div>
   </section>
 
-  <!-- ===== HALAMAN: SEMESTER ===== -->
+  <!-- HALAMAN: SEMESTER -->
   <section id="halaman-semester" class="halaman">
-    <div class="halaman-tajuk">
-      <div>
-        <h1>🗓️ Pengurusan Semester</h1>
-        <p>Mulakan semester baru dan semak log aktiviti sistem</p>
-      </div>
-    </div>
-
-    <!-- Info Semester Semasa -->
+    <div class="halaman-tajuk"><div><h1>🗓️ Pengurusan Semester</h1><p>Mulakan semester baru dan semak log aktiviti sistem</p></div></div>
     <div class="panel" style="margin-bottom:20px">
       <div class="panel-kepala"><h2>📌 Semester Semasa</h2></div>
       <div class="panel-badan" style="display:flex;gap:40px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:11px;color:var(--kelabu-gelap);font-weight:600;text-transform:uppercase">Nama Semester</div>
-          <div style="font-size:20px;font-weight:700;color:var(--biru-gelap);margin-top:4px" id="sem-nama-semasa">—</div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--kelabu-gelap);font-weight:600;text-transform:uppercase">Tarikh Mula</div>
-          <div style="font-size:20px;font-weight:700;color:var(--biru-gelap);margin-top:4px" id="sem-tarikh-mula">—</div>
-        </div>
+        <div><div style="font-size:11px;color:var(--kelabu-gelap);font-weight:600;text-transform:uppercase">Nama Semester</div><div style="font-size:20px;font-weight:700;color:var(--biru-gelap);margin-top:4px" id="sem-nama-semasa">—</div></div>
+        <div><div style="font-size:11px;color:var(--kelabu-gelap);font-weight:600;text-transform:uppercase">Tarikh Mula</div><div style="font-size:20px;font-weight:700;color:var(--biru-gelap);margin-top:4px" id="sem-tarikh-mula">—</div></div>
       </div>
     </div>
-
-    <!-- Wizard Semester Baru -->
     <div class="panel">
       <div class="panel-kepala"><h2>🚀 Mulakan Semester Baru</h2></div>
       <div class="panel-badan">
-
-        <div class="kotak-amaran kuning">
-          <span class="kotak-amaran-ikon">⚠️</span>
-          <div><strong>Perhatian:</strong> Tindakan ini akan menaikkan kelas semua pelajar <strong>Aktif</strong> secara automatik, dan menetapkan semula status takaful SEMUA pelajar kepada <strong>Belum Bayar</strong>. Pelajar Repeat/Extend/Junior/Tangguh perlu disemak secara manual selepas proses.</div>
-        </div>
-
-        <!-- Wizard langkah -->
+        <div class="kotak-amaran kuning"><span class="kotak-amaran-ikon">⚠️</span><div><strong>Perhatian:</strong> Tindakan ini akan menaikkan kelas semua pelajar <strong>Aktif</strong> secara automatik, dan menetapkan semula status takaful SEMUA pelajar kepada <strong>Belum Bayar</strong>. Pelajar Repeat/Extend/Junior/Tangguh perlu disemak secara manual selepas proses.</div></div>
         <div class="wizard-langkah">
-          <div class="wizard-item aktif">
-            <span class="wizard-nombor">1</span>
-            Nama Semester
-          </div>
-          <div class="wizard-item">
-            <span class="wizard-nombor">2</span>
-            Semak Preview
-          </div>
-          <div class="wizard-item">
-            <span class="wizard-nombor">3</span>
-            Selesai
-          </div>
+          <div class="wizard-item aktif"><span class="wizard-nombor">1</span>Nama Semester</div>
+          <div class="wizard-item"><span class="wizard-nombor">2</span>Semak Preview</div>
+          <div class="wizard-item"><span class="wizard-nombor">3</span>Selesai</div>
         </div>
-
-        <!-- Panel Langkah 1 -->
+        <!-- Langkah 1 -->
         <div class="wizard-panel aktif">
-          <div class="kumpulan-borang">
-            <label>Nama Semester Baru</label>
-            <input type="text" id="inp-nama-semester-baru" class="kawalan-borang"
-                   placeholder="cth: Sem 5 2025/2026" style="max-width:320px">
-          </div>
+          <div class="kumpulan-borang"><label>Nama Semester Baru</label><input type="text" id="inp-nama-semester-baru" class="kawalan-borang" placeholder="cth: Sem 5 2025/2026" style="max-width:320px"></div>
           <button class="btn btn-utama" onclick="wizard_semak_preview()">Seterusnya →</button>
         </div>
-
-        <!-- Panel Langkah 2 -->
+        <!-- Langkah 2 -->
         <div class="wizard-panel">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-            <div class="kad hijau">
-              <div class="kad-ikon">⬆️</div>
-              <div class="kad-nilai" id="preview-bil-aktif">—</div>
-              <div class="kad-label">Pelajar Naik Kelas (Auto)</div>
-            </div>
-            <div class="kad oren">
-              <div class="kad-ikon">✋</div>
-              <div class="kad-nilai" id="preview-bil-manual">—</div>
-              <div class="kad-label">Perlu Semakan Manual</div>
-            </div>
+            <div class="kad hijau"><div class="kad-ikon">⬆️</div><div class="kad-nilai" id="preview-bil-aktif">—</div><div class="kad-label">Pelajar Naik Kelas (Auto)</div></div>
+            <div class="kad oren"><div class="kad-ikon">✋</div><div class="kad-nilai" id="preview-bil-manual">—</div><div class="kad-label">Perlu Semakan Manual</div></div>
           </div>
-
-          <div class="panel" style="margin-bottom:16px">
-            <div class="panel-kepala"><h2>✅ Akan Dinaikkan Kelas Automatik</h2></div>
-            <div class="panel-badan" id="preview-naik-auto"></div>
-          </div>
-
+          <div class="panel" style="margin-bottom:16px"><div class="panel-kepala"><h2>✅ Akan Dinaikkan Kelas Automatik</h2></div><div class="panel-badan" id="preview-naik-auto"></div></div>
           <div id="preview-semak-manual" style="margin-bottom:16px"></div>
-
           <div style="display:flex;gap:10px">
             <button class="btn btn-biasa" onclick="wizard_semula()">← Kembali</button>
             <button class="btn btn-bahaya" onclick="wizard_proses_semester()">✅ Sahkan &amp; Mulakan Semester <strong id="preview-nama-semester"></strong></button>
           </div>
         </div>
-
-        <!-- Panel Langkah 3 — Selesai -->
+        <!-- Langkah 3 -->
         <div class="wizard-panel">
-          <div class="kotak-amaran hijau">
-            <span class="kotak-amaran-ikon">🎉</span>
-            <div>
-              <strong>Semester baru berjaya dimulakan!</strong><br>
-              Semester <strong id="selesai-nama-semester"></strong> telah diaktifkan.
-              <strong id="selesai-bil-naik"></strong> pelajar telah dinaikkan kelas.
-              Status takaful semua pelajar telah ditetapkan semula kepada <strong>Belum Bayar</strong>.
-            </div>
-          </div>
+          <div class="kotak-amaran hijau"><span class="kotak-amaran-ikon">🎉</span><div><strong>Semester baru berjaya dimulakan!</strong><br>Semester <strong id="selesai-nama-semester"></strong> telah diaktifkan. <strong id="selesai-bil-naik"></strong> pelajar telah dinaikkan kelas. Status takaful semua pelajar telah ditetapkan semula kepada <strong>Belum Bayar</strong>.</div></div>
           <div style="display:flex;gap:10px;margin-top:16px">
             <button class="btn btn-utama" onclick="navigasi('perhatian')">⚠️ Semak Pelajar Tercicir</button>
             <button class="btn btn-biasa" onclick="wizard_semula()">Mulakan Lagi</button>
           </div>
         </div>
-
       </div>
     </div>
-
-    <!-- Log Aktiviti -->
-    <div class="panel">
-      <div class="panel-kepala"><h2>📋 Log Aktiviti Sistem</h2></div>
-      <div class="panel-badan" id="log-aktiviti"></div>
-    </div>
+    <div class="panel"><div class="panel-kepala"><h2>📋 Log Aktiviti Sistem</h2></div><div class="panel-badan" id="log-aktiviti"></div></div>
   </section>
 
 </main>
 
-<!-- ===== MODAL BORANG PELAJAR ===== -->
+<!-- MODAL BORANG PELAJAR -->
 <div id="modal-borang-pelajar" class="modal-latar">
   <div class="modal-kotak">
-    <div class="modal-kepala">
-      <h3 class="modal-tajuk-teks">Pelajar</h3>
-      <button class="modal-tutup" onclick="tutup_modal('modal-borang-pelajar')">✕</button>
-    </div>
+    <div class="modal-kepala"><h3 class="modal-tajuk-teks">Pelajar</h3><button class="modal-tutup" onclick="tutup_modal('modal-borang-pelajar')">✕</button></div>
     <div class="modal-badan">
       <div class="grid-borang-2">
-        <div class="kumpulan-borang">
-          <label>No. Matrik *</label>
-          <input type="text" id="f-id" class="kawalan-borang" placeholder="cth: 22DKM01234">
-        </div>
-        <div class="kumpulan-borang">
-          <label>No. IC</label>
-          <input type="text" id="f-no-ic" class="kawalan-borang" placeholder="cth: 040101-14-5678">
-        </div>
+        <div class="kumpulan-borang"><label>No. Matrik *</label><input type="text" id="f-id" class="kawalan-borang" placeholder="cth: 22DKM01234"></div>
+        <div class="kumpulan-borang"><label>No. IC</label><input type="text" id="f-no-ic" class="kawalan-borang" placeholder="cth: 040101-14-5678"></div>
       </div>
-      <div class="kumpulan-borang">
-        <label>Nama Penuh *</label>
-        <input type="text" id="f-nama" class="kawalan-borang" placeholder="Nama penuh pelajar">
-      </div>
+      <div class="kumpulan-borang"><label>Nama Penuh *</label><input type="text" id="f-nama" class="kawalan-borang" placeholder="Nama penuh pelajar"></div>
       <div class="grid-borang-3">
-        <div class="kumpulan-borang">
-          <label>Program</label>
-          <input type="text" id="f-program" class="kawalan-borang" placeholder="cth: DKM">
-        </div>
-        <div class="kumpulan-borang">
-          <label>Semester Masuk</label>
-          <input type="text" id="f-sem-masuk" class="kawalan-borang" placeholder="cth: Sem 1 2023/2024">
-        </div>
-        <div class="kumpulan-borang">
-          <label>Penasihat Akademik (PA)</label>
-          <input type="text" id="f-nama-pa" class="kawalan-borang" placeholder="Nama PA">
-        </div>
+        <div class="kumpulan-borang"><label>Program</label><input type="text" id="f-program" class="kawalan-borang" placeholder="cth: DKM"></div>
+        <div class="kumpulan-borang"><label>Semester Masuk</label><input type="text" id="f-sem-masuk" class="kawalan-borang" placeholder="cth: Sem 1 2023/2024"></div>
+        <div class="kumpulan-borang"><label>Penasihat Akademik (PA)</label><input type="text" id="f-nama-pa" class="kawalan-borang" placeholder="Nama PA"></div>
       </div>
       <div class="grid-borang-2">
-        <div class="kumpulan-borang">
-          <label>Kelas Semasa</label>
-          <input type="text" id="f-kelas-semasa" class="kawalan-borang" placeholder="cth: DKM2A">
-        </div>
-        <div class="kumpulan-borang">
-          <label>Semester Semasa</label>
-          <input type="text" id="f-sem-semasa" class="kawalan-borang" placeholder="cth: Sem 3 2024/2025">
-        </div>
+        <div class="kumpulan-borang"><label>Kelas Semasa</label><input type="text" id="f-kelas-semasa" class="kawalan-borang" placeholder="cth: DKM2A"></div>
+        <div class="kumpulan-borang"><label>Semester Semasa</label><input type="text" id="f-sem-semasa" class="kawalan-borang" placeholder="cth: Sem 3 2024/2025"></div>
       </div>
       <div class="grid-borang-2">
-        <div class="kumpulan-borang">
-          <label>Status Pengajian</label>
+        <div class="kumpulan-borang"><label>Status Pengajian</label>
           <select id="f-status-pengajian" class="kawalan-borang" onchange="togol_medan_tercicir()">
-            <option value="aktif">Aktif</option>
-            <option value="repeat">Repeat</option>
-            <option value="extend">Extend</option>
-            <option value="junior">Junior</option>
-            <option value="tangguh">Tangguh</option>
+            <option value="aktif">Aktif</option><option value="repeat">Repeat</option>
+            <option value="extend">Extend</option><option value="junior">Junior</option><option value="tangguh">Tangguh</option>
           </select>
         </div>
-        <div class="kumpulan-borang">
-          <label>Status Takaful</label>
+        <div class="kumpulan-borang"><label>Status Takaful</label>
           <select id="f-status-takaful" class="kawalan-borang">
-            <option value="belum_bayar">Belum Bayar</option>
-            <option value="bayar">Sudah Bayar</option>
-            <option value="tunggu">Tunggu Pengesahan</option>
-            <option value="pengecualian">Pengecualian</option>
+            <option value="belum_bayar">Belum Bayar</option><option value="bayar">Sudah Bayar</option>
+            <option value="tunggu">Tunggu Pengesahan</option><option value="pengecualian">Pengecualian</option>
           </select>
         </div>
       </div>
-      <!-- Kelas & Semester Asal (untuk pelajar tercicir sahaja) -->
       <div id="bahagian-kelas-asal" class="grid-borang-2" style="display:none">
-        <div class="kumpulan-borang">
-          <label>Kelas Sepatutnya (Asal)</label>
-          <input type="text" id="f-kelas-asal" class="kawalan-borang" placeholder="Kelas jika tiada masalah">
-        </div>
-        <div class="kumpulan-borang">
-          <label>Semester Sepatutnya (Asal)</label>
-          <input type="text" id="f-sem-asal" class="kawalan-borang" placeholder="Semester jika tiada masalah">
-        </div>
+        <div class="kumpulan-borang"><label>Kelas Sepatutnya (Asal)</label><input type="text" id="f-kelas-asal" class="kawalan-borang" placeholder="Kelas jika tiada masalah"></div>
+        <div class="kumpulan-borang"><label>Semester Sepatutnya (Asal)</label><input type="text" id="f-sem-asal" class="kawalan-borang" placeholder="Semester jika tiada masalah"></div>
       </div>
-      <div class="kumpulan-borang">
-        <label>Sebab Status (jika berkaitan)</label>
-        <input type="text" id="f-sebab-status" class="kawalan-borang" placeholder="cth: Gagal subjek Matematik">
-      </div>
-      <div class="kumpulan-borang">
-        <label>Catatan</label>
-        <textarea id="f-catatan" class="kawalan-borang" placeholder="Catatan tambahan..."></textarea>
-      </div>
+      <div class="kumpulan-borang"><label>Sebab Status (jika berkaitan)</label><input type="text" id="f-sebab-status" class="kawalan-borang" placeholder="cth: Gagal subjek Matematik"></div>
+      <div class="kumpulan-borang"><label>Catatan</label><textarea id="f-catatan" class="kawalan-borang" placeholder="Catatan tambahan..."></textarea></div>
     </div>
     <div class="modal-kaki">
       <button class="btn btn-utama" onclick="simpan_borang_pelajar()">💾 Simpan</button>
@@ -497,65 +454,412 @@
   </div>
 </div>
 
-<!-- ===== MODAL BAYARAN ===== -->
+<!-- MODAL BAYARAN -->
 <div id="modal-bayaran" class="modal-latar">
   <div class="modal-kotak">
-    <div class="modal-kepala">
-      <h3 class="modal-tajuk-teks">Rekod Bayaran</h3>
-      <button class="modal-tutup" onclick="tutup_modal('modal-bayaran')">✕</button>
-    </div>
-    <div class="modal-badan"></div>
-    <div class="modal-kaki"></div>
+    <div class="modal-kepala"><h3 class="modal-tajuk-teks">Rekod Bayaran</h3><button class="modal-tutup" onclick="tutup_modal('modal-bayaran')">✕</button></div>
+    <div class="modal-badan"></div><div class="modal-kaki"></div>
   </div>
 </div>
 
-<!-- ===== MODAL PROFIL ===== -->
+<!-- MODAL PROFIL -->
 <div id="modal-profil" class="modal-latar">
   <div class="modal-kotak">
-    <div class="modal-kepala">
-      <h3 class="modal-tajuk-teks">Profil Pelajar</h3>
-      <button class="modal-tutup" onclick="tutup_modal('modal-profil')">✕</button>
-    </div>
-    <div class="modal-badan"></div>
-    <div class="modal-kaki"></div>
+    <div class="modal-kepala"><h3 class="modal-tajuk-teks">Profil Pelajar</h3><button class="modal-tutup" onclick="tutup_modal('modal-profil')">✕</button></div>
+    <div class="modal-badan"></div><div class="modal-kaki"></div>
   </div>
 </div>
 
-<!-- ===== MODAL PREVIEW RESIT ===== -->
+<!-- MODAL PREVIEW RESIT -->
 <div id="modal-preview-resit" class="modal-latar">
   <div class="modal-kotak">
-    <div class="modal-kepala">
-      <h3 class="modal-tajuk-teks">Resit Bayaran</h3>
-      <button class="modal-tutup" onclick="tutup_modal('modal-preview-resit')">✕</button>
-    </div>
-    <div class="modal-badan"></div>
-    <div class="modal-kaki"></div>
+    <div class="modal-kepala"><h3 class="modal-tajuk-teks">Resit Bayaran</h3><button class="modal-tutup" onclick="tutup_modal('modal-preview-resit')">✕</button></div>
+    <div class="modal-badan"></div><div class="modal-kaki"></div>
   </div>
 </div>
 
-<!-- ===== SKRIP ===== -->
-<script src="js/dataManager.js"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/studentList.js"></script>
-<script src="js/payment.js"></script>
-<script src="js/atRisk.js"></script>
-<script src="js/semesterManager.js"></script>
 <script>
-  // Fungsi togol seksyen (accordion)
-  function togol_seksyen(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
-  }
-  // Responsif sidebar toggle
-  function semak_saiz() {
-    const btn = document.getElementById('btn-toggle-sidebar');
-    if (btn) btn.style.display = window.innerWidth < 900 ? 'block' : 'none';
-  }
-  window.addEventListener('resize', semak_saiz);
-  semak_saiz();
-</script>
-<script src="js/app.js"></script>
+/* ============================================================
+   DATA CONTOH — dimuatkan secara automatik jika tiada data
+   ============================================================ */
+const DATA_CONTOH = [
+  {"id":"22DKM01001","nama":"Ahmad Faris bin Azman","no_ic":"041234-14-5678","program":"DKM","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DKM3A","kelas_asal":"DKM3A","semester_semasa":"Sem 5 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"Pn. Siti Aminah Bt. Yusof","status_takaful":"bayar","tarikh_bayaran":"2024-09-05","amaun_bayaran":"45.00","resit_nama_fail":null,"resit_data":null,"resit_disahkan":true,"tarikh_disahkan":"2024-09-06T08:30:00.000Z","catatan":""},
+  {"id":"22DKM01002","nama":"Nurul Ain binti Razali","no_ic":"041122-06-3344","program":"DKM","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DKM2A","kelas_asal":"DKM3A","semester_semasa":"Sem 4 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"repeat","sebab_status":"Gagal subjek Matematik Kejuruteraan","nama_pa":"Pn. Siti Aminah Bt. Yusof","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":"Pelajar dihubungi 3 kali - tiada respons"},
+  {"id":"21DIT00987","nama":"Haziq Izzuddin bin Hamdan","no_ic":"031015-08-7890","program":"DIT","semester_masuk":"Sem 1 2021/2022","kelas_semasa":"DIT3A","kelas_asal":"DIT3A","semester_semasa":"Sem 7 2024/2025","semester_asal":"Tamat Sem 6 2023/2024","status_pengajian":"extend","sebab_status":"Projek akhir tidak siap — lanjutkan 1 semester","nama_pa":"En. Razif bin Bahari","status_takaful":"tunggu","tarikh_bayaran":"2024-09-10","amaun_bayaran":"45.00","resit_nama_fail":"resit_haziq.jpg","resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":""},
+  {"id":"23DKM02011","nama":"Siti Hajar binti Kamarudin","no_ic":"050607-07-2211","program":"DKM","semester_masuk":"Sem 1 2023/2024","kelas_semasa":"DKM1C","kelas_asal":"DKM2C","semester_semasa":"Sem 2 2024/2025","semester_asal":"Sem 3 2024/2025","status_pengajian":"junior","sebab_status":"Masuk kelas junior kerana gagal 3 subjek","nama_pa":"Pn. Siti Aminah Bt. Yusof","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":""},
+  {"id":"22DIT01055","nama":"Muhammad Faiz bin Zulkifli","no_ic":"040321-03-9988","program":"DIT","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DIT3B","kelas_asal":"DIT3B","semester_semasa":"Sem 5 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"En. Razif bin Bahari","status_takaful":"bayar","tarikh_bayaran":"2024-09-03","amaun_bayaran":"45.00","resit_nama_fail":null,"resit_data":null,"resit_disahkan":true,"tarikh_disahkan":"2024-09-04T09:00:00.000Z","catatan":""},
+  {"id":"23DAT03022","nama":"Nur Izzati binti Mohd Noor","no_ic":"050910-11-4455","program":"DAT","semester_masuk":"Sem 1 2023/2024","kelas_semasa":"DAT2A","kelas_asal":"DAT2A","semester_semasa":"Sem 3 2024/2025","semester_asal":"Sem 3 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"En. Razif bin Bahari","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":""},
+  {"id":"21DKM00441","nama":"Amirul Hafiz bin Rosli","no_ic":"030811-04-6677","program":"DKM","semester_masuk":"Sem 1 2021/2022","kelas_semasa":"DKM2B","kelas_asal":"DKM3B","semester_semasa":"Sem 4 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"repeat","sebab_status":"Gagal Thermodynamics","nama_pa":"Pn. Norhaslinda binti Ahmad","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":"Ibu bapa dihubungi"},
+  {"id":"23DAT03044","nama":"Farhana binti Othman","no_ic":"050201-09-1122","program":"DAT","semester_masuk":"Sem 1 2023/2024","kelas_semasa":"DAT2B","kelas_asal":"DAT2B","semester_semasa":"Sem 3 2024/2025","semester_asal":"Sem 3 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"Pn. Norhaslinda binti Ahmad","status_takaful":"tunggu","tarikh_bayaran":"2024-09-12","amaun_bayaran":"45.00","resit_nama_fail":"resit_farhana.png","resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":""},
+  {"id":"22DIT01088","nama":"Syafiq Danial bin Ismail","no_ic":"040615-12-3344","program":"DIT","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DIT3A","kelas_asal":"DIT3A","semester_semasa":"Sem 5 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"tangguh","sebab_status":"Masalah kesihatan — pengesahan doktor dikemukakan","nama_pa":"En. Razif bin Bahari","status_takaful":"pengecualian","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":"Dikecualikan takaful sem ini atas sebab kesihatan"},
+  {"id":"23DKM02055","nama":"Liyana binti Abdullah","no_ic":"051118-05-8877","program":"DKM","semester_masuk":"Sem 1 2023/2024","kelas_semasa":"DKM2C","kelas_asal":"DKM2C","semester_semasa":"Sem 3 2024/2025","semester_asal":"Sem 3 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"Pn. Siti Aminah Bt. Yusof","status_takaful":"bayar","tarikh_bayaran":"2024-09-08","amaun_bayaran":"45.00","resit_nama_fail":null,"resit_data":null,"resit_disahkan":true,"tarikh_disahkan":"2024-09-09T10:00:00.000Z","catatan":""},
+  {"id":"22DAT02033","nama":"Izzatul Husna binti Zainal","no_ic":"040909-06-5566","program":"DAT","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DAT3A","kelas_asal":"DAT3A","semester_semasa":"Sem 5 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"Pn. Norhaslinda binti Ahmad","status_takaful":"bayar","tarikh_bayaran":"2024-09-01","amaun_bayaran":"45.00","resit_nama_fail":null,"resit_data":null,"resit_disahkan":true,"tarikh_disahkan":"2024-09-02T07:30:00.000Z","catatan":""},
+  {"id":"22DIT01122","nama":"Hafizuddin bin Nasir","no_ic":"040228-02-7788","program":"DIT","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DIT2B","kelas_asal":"DIT3B","semester_semasa":"Sem 4 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"repeat","sebab_status":"Gagal Digital Electronics","nama_pa":"En. Razif bin Bahari","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":""},
+  {"id":"23DKM02088","nama":"Anis Qistina binti Roslan","no_ic":"050420-07-3311","program":"DKM","semester_masuk":"Sem 1 2023/2024","kelas_semasa":"DKM2A","kelas_asal":"DKM2A","semester_semasa":"Sem 3 2024/2025","semester_asal":"Sem 3 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"Pn. Siti Aminah Bt. Yusof","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":""},
+  {"id":"23DAT03077","nama":"Mohd Nadzrul Ariff bin Zaki","no_ic":"050715-10-9900","program":"DAT","semester_masuk":"Sem 1 2023/2024","kelas_semasa":"DAT1A","kelas_asal":"DAT2A","semester_semasa":"Sem 2 2024/2025","semester_asal":"Sem 3 2024/2025","status_pengajian":"junior","sebab_status":"Turun kelas kerana gagal lebih 3 subjek","nama_pa":"Pn. Norhaslinda binti Ahmad","status_takaful":"belum_bayar","tarikh_bayaran":null,"amaun_bayaran":null,"resit_nama_fail":null,"resit_data":null,"resit_disahkan":false,"tarikh_disahkan":null,"catatan":"PA dah maklumkan"},
+  {"id":"22DKM01099","nama":"Zariq Harith bin Dzulkifli","no_ic":"040101-08-4466","program":"DKM","semester_masuk":"Sem 1 2022/2023","kelas_semasa":"DKM3A","kelas_asal":"DKM3A","semester_semasa":"Sem 5 2024/2025","semester_asal":"Sem 5 2024/2025","status_pengajian":"aktif","sebab_status":"","nama_pa":"Pn. Norhaslinda binti Ahmad","status_takaful":"bayar","tarikh_bayaran":"2024-09-07","amaun_bayaran":"45.00","resit_nama_fail":null,"resit_data":null,"resit_disahkan":true,"tarikh_disahkan":"2024-09-07T14:00:00.000Z","catatan":""}
+];
 
+/* ============================================================
+   dataManager.js
+   ============================================================ */
+const KUNCI_DATA = 'takaful_pelajar';
+const KUNCI_SEMESTER = 'takaful_semester';
+const KUNCI_LOG = 'takaful_log';
+
+function semua_pelajar() { const r = localStorage.getItem(KUNCI_DATA); return r ? JSON.parse(r) : []; }
+function simpan_semua(s) { localStorage.setItem(KUNCI_DATA, JSON.stringify(s)); }
+function cari_pelajar(id) { return semua_pelajar().find(p => p.id === id) || null; }
+
+function tambah_pelajar(rekod) {
+  const senarai = semua_pelajar();
+  if (senarai.find(p => p.id === rekod.id)) { tunjuk_notif('No. Matrik sudah wujud dalam sistem!', 'merah'); return false; }
+  rekod.tarikh_daftar = new Date().toISOString();
+  senarai.push(rekod); simpan_semua(senarai);
+  tambah_log('TAMBAH', `Pelajar ${rekod.nama} (${rekod.id}) ditambah.`);
+  return true;
+}
+
+function kemaskini_pelajar(id, data_baru) {
+  const senarai = semua_pelajar();
+  const idx = senarai.findIndex(p => p.id === id);
+  if (idx === -1) return false;
+  senarai[idx] = { ...senarai[idx], ...data_baru }; simpan_semua(senarai); return true;
+}
+
+function padam_pelajar(id) {
+  simpan_semua(semua_pelajar().filter(p => p.id !== id));
+  tambah_log('PADAM', `Pelajar ${id} dipadam dari sistem.`);
+}
+
+function dapatkan_semester() { const r = localStorage.getItem(KUNCI_SEMESTER); return r ? JSON.parse(r) : { nama: 'Sem 1 2025/2026', tarikh_mula: new Date().toISOString() }; }
+function simpan_semester(d) { localStorage.setItem(KUNCI_SEMESTER, JSON.stringify(d)); }
+function semua_log() { const r = localStorage.getItem(KUNCI_LOG); return r ? JSON.parse(r) : []; }
+function tambah_log(jenis, mesej) { const log = semua_log(); log.unshift({ jenis, mesej, masa: new Date().toISOString() }); if (log.length > 200) log.splice(200); localStorage.setItem(KUNCI_LOG, JSON.stringify(log)); }
+
+function eksport_json() { muat_turun(JSON.stringify({ pelajar: semua_pelajar(), semester: dapatkan_semester(), eksport_masa: new Date().toISOString() }, null, 2), `takaful-backup-${tarikh_fail()}.json`, 'application/json'); }
+
+function import_json(fail, callback) {
+  const p = new FileReader();
+  p.onload = e => { try { const d = JSON.parse(e.target.result); if (!d.pelajar || !Array.isArray(d.pelajar)) throw new Error(); simpan_semua(d.pelajar); if (d.semester) simpan_semester(d.semester); tambah_log('IMPORT', `Import JSON berjaya — ${d.pelajar.length} rekod.`); callback(true, d.pelajar.length); } catch { callback(false, 0); } };
+  p.readAsText(fail);
+}
+
+function eksport_csv() {
+  const senarai = semua_pelajar();
+  const lajur = ['id','nama','no_ic','program','semester_masuk','kelas_semasa','kelas_asal','semester_semasa','semester_asal','status_pengajian','sebab_status','nama_pa','status_takaful','tarikh_bayaran','amaun_bayaran','resit_disahkan','tarikh_disahkan','catatan'];
+  const baris = [lajur.join(',')];
+  senarai.forEach(p => { baris.push(lajur.map(k => `"${(p[k]===null||p[k]===undefined?'':String(p[k])).replace(/"/g,'""')}"`).join(',')); });
+  muat_turun('\uFEFF' + baris.join('\r\n'), `takaful-${tarikh_fail()}.csv`, 'text/csv;charset=utf-8');
+}
+
+function import_csv_bayaran(fail, callback) {
+  const p = new FileReader();
+  p.onload = e => { const baris = e.target.result.split('\n').map(b => b.trim()).filter(Boolean); let dk = 0, g = 0; for (let i = 1; i < baris.length; i++) { const c = baris[i].split(',').map(x => x.replace(/^"|"$/g,'').trim()); const [nm, t, a] = c; if (!nm) continue; kemaskini_pelajar(nm, { status_takaful:'tunggu', tarikh_bayaran:t||null, amaun_bayaran:a||null, resit_disahkan:false }) ? dk++ : g++; } tambah_log('IMPORT_CSV', `Import CSV: ${dk} berjaya, ${g} gagal.`); callback(dk, g); };
+  p.readAsText(fail);
+}
+
+function muat_turun(kandungan, nama, jenis) { const b = new Blob([kandungan], {type:jenis}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href=u; a.download=nama; a.click(); URL.revokeObjectURL(u); }
+function tarikh_fail() { const d = new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
+function format_tarikh(iso) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('ms-MY', {day:'2-digit',month:'short',year:'numeric'}); }
+function format_matawang(a) { if (!a && a !== 0) return '—'; return 'RM ' + Number(a).toFixed(2); }
+function kelas_paparan(p) { if (!p.kelas_asal || p.kelas_semasa === p.kelas_asal) return p.kelas_semasa || '—'; return `${p.kelas_semasa} <span class="kelas-asal">(sepatutnya ${p.kelas_asal})</span>`; }
+function lencana_pengajian(s) { const m = {aktif:['lencana-aktif','✓ Aktif'],repeat:['lencana-repeat','⚠ Repeat'],extend:['lencana-extend','↗ Extend'],junior:['lencana-junior','↓ Junior'],tangguh:['lencana-tangguh','⏸ Tangguh']}; const [k,t] = m[s]||['lencana-aktif',s]; return `<span class="lencana ${k}">${t}</span>`; }
+function lencana_takaful(s) { const m = {bayar:['lencana-bayar','✓ Sudah Bayar'],belum_bayar:['lencana-belum','✗ Belum Bayar'],tunggu:['lencana-tunggu','⏳ Menunggu Sahkan'],pengecualian:['lencana-kecuali','○ Pengecualian']}; const [k,t] = m[s]||['lencana-belum',s]; return `<span class="lencana ${k}">${t}</span>`; }
+
+function muat_data_contoh_jika_kosong() {
+  if (semua_pelajar().length === 0) {
+    simpan_semua(DATA_CONTOH);
+    tambah_log('SISTEM', 'Data contoh dimuat ke dalam sistem.');
+    if (window.app && typeof window.app.refresh === 'function') window.app.refresh();
+  }
+}
+
+/* ============================================================
+   dashboard.js
+   ============================================================ */
+let chartTakaful = null, chartPengajian = null;
+
+function render_dashboard() {
+  const senarai = semua_pelajar(); const sem = dapatkan_semester();
+  const bayar = senarai.filter(p => p.status_takaful === 'bayar').length;
+  const belum = senarai.filter(p => p.status_takaful === 'belum_bayar').length;
+  const tunggu = senarai.filter(p => p.status_takaful === 'tunggu').length;
+  const repeat_n = senarai.filter(p => p.status_pengajian === 'repeat').length;
+  const extend_n = senarai.filter(p => p.status_pengajian === 'extend').length;
+  const junior_n = senarai.filter(p => p.status_pengajian === 'junior').length;
+  const tangguh_n = senarai.filter(p => p.status_pengajian === 'tangguh').length;
+  set_teks('kad-jumlah', senarai.length); set_teks('kad-bayar', bayar);
+  set_teks('kad-belum', belum + tunggu); set_teks('kad-tunggu', tunggu);
+  set_teks('kad-bermasalah', repeat_n + extend_n + junior_n + tangguh_n); set_teks('kad-repeat', repeat_n);
+  const el_sem = document.getElementById('info-semester');
+  if (el_sem) { const hari = Math.floor((new Date() - new Date(sem.tarikh_mula)) / 864e5); el_sem.textContent = `${sem.nama} • Hari ke-${hari + 1}`; }
+  const el_badge = document.querySelector('.semester-badge');
+  if (el_badge) el_badge.textContent = sem.nama;
+  const ctx1 = document.getElementById('carta-takaful');
+  if (ctx1) { if (chartTakaful) chartTakaful.destroy(); chartTakaful = new Chart(ctx1, { type:'doughnut', data:{ labels:['Sudah Bayar','Belum Bayar','Menunggu Sahkan','Pengecualian'], datasets:[{ data:[bayar, belum, tunggu, senarai.filter(p=>p.status_takaful==='pengecualian').length], backgroundColor:['#27ae60','#e74c3c','#f39c12','#2980b9'], borderWidth:2, borderColor:'#fff' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{size:12}, padding:14 } } }, cutout:'60%' } }); }
+  const ctx2 = document.getElementById('carta-pengajian');
+  if (ctx2) { if (chartPengajian) chartPengajian.destroy(); chartPengajian = new Chart(ctx2, { type:'bar', data:{ labels:['Aktif','Repeat','Extend','Junior','Tangguh'], datasets:[{ label:'Bilangan Pelajar', data:[senarai.filter(p=>p.status_pengajian==='aktif').length, repeat_n, extend_n, junior_n, tangguh_n], backgroundColor:['#27ae60','#e67e22','#2980b9','#8e44ad','#95a5a6'], borderRadius:5, borderSkipped:false }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,ticks:{stepSize:1}}, x:{grid:{display:false}} } } }); }
+  const perhatian = senarai.filter(p => p.status_takaful === 'belum_bayar' || ['repeat','extend','junior'].includes(p.status_pengajian)).slice(0, 8);
+  const el = document.getElementById('senarai-perhatian-dash');
+  if (el) el.innerHTML = perhatian.length === 0 ? '<div class="tiada-data"><div class="tiada-data-ikon">🎉</div><p>Tiada pelajar memerlukan perhatian segera!</p></div>' : perhatian.map(p => `<div class="item-log" style="cursor:pointer" onclick="buka_profil('${p.id}')"><div style="flex:1"><strong>${p.nama}</strong> <span style="color:var(--kelabu-gelap);font-size:12px">${p.id}</span><br><span style="font-size:12px">${p.kelas_semasa} &nbsp;|&nbsp; ${lencana_pengajian(p.status_pengajian)} &nbsp;${lencana_takaful(p.status_takaful)}</span></div><span style="color:var(--biru-cerah);font-size:12px">→</span></div>`).join('');
+}
+
+/* ============================================================
+   studentList.js
+   ============================================================ */
+let penapis_semasa = { carian:'', pengajian:'', takaful:'', program:'', pa:'' };
+let mod_borang = 'tambah', id_edit_semasa = null;
+
+function render_senarai_pelajar() {
+  let senarai = semua_pelajar();
+  if (penapis_semasa.carian) { const q = penapis_semasa.carian.toLowerCase(); senarai = senarai.filter(p => p.nama.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || (p.nama_pa||'').toLowerCase().includes(q)); }
+  if (penapis_semasa.pengajian) senarai = senarai.filter(p => p.status_pengajian === penapis_semasa.pengajian);
+  if (penapis_semasa.takaful)   senarai = senarai.filter(p => p.status_takaful   === penapis_semasa.takaful);
+  if (penapis_semasa.program)   senarai = senarai.filter(p => (p.program||'').toLowerCase() === penapis_semasa.program.toLowerCase());
+  const el = document.getElementById('jadual-pelajar-badan'); if (!el) return;
+  set_teks('bil-dipapar', senarai.length); set_teks('bil-jumlah', semua_pelajar().length);
+  el.innerHTML = senarai.length === 0
+    ? `<tr><td colspan="8"><div class="tiada-data"><div class="tiada-data-ikon">🔍</div><p>Tiada pelajar ditemui.</p></div></td></tr>`
+    : senarai.map(p => `<tr><td><strong>${p.id}</strong></td><td><span class="pautan-pelajar" onclick="buka_profil('${p.id}')">${p.nama}</span></td><td>${p.program||'—'}</td><td>${kelas_paparan(p)}</td><td>${lencana_pengajian(p.status_pengajian)}</td><td>${lencana_takaful(p.status_takaful)}</td><td>${p.nama_pa||'—'}</td><td><button class="btn btn-biasa btn-kecil" onclick="buka_edit_pelajar('${p.id}')">✏️ Edit</button> <button class="btn btn-bahaya btn-kecil" onclick="sahkan_padam('${p.id}','${p.nama.replace(/'/g,"\\'")}')">🗑</button></td></tr>`).join('');
+}
+
+function buka_profil(id) {
+  const p = cari_pelajar(id); if (!p) return;
+  const resit_html = p.resit_data ? `<div style="margin-top:8px"><button class="btn btn-biasa btn-kecil" onclick="preview_resit('${id}')">👁 Lihat Resit</button>${!p.resit_disahkan?`<button class="btn btn-berjaya btn-kecil" onclick="sahkan_resit('${id}')">✅ Sahkan</button>`:''}</div>` : `<span style="color:var(--kelabu)">Tiada resit diupload</span>`;
+  const kelas_html = (p.kelas_asal && p.kelas_semasa !== p.kelas_asal) ? `${p.kelas_semasa} <span class="kelas-asal">(sepatutnya ${p.kelas_asal})</span>` : (p.kelas_semasa||'—');
+  const sem_html = (p.semester_asal && p.semester_semasa !== p.semester_asal) ? `${p.semester_semasa} <span class="kelas-asal">(sepatutnya ${p.semester_asal})</span>` : (p.semester_semasa||'—');
+  const badan = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px">
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">NO. MATRIK</label><p>${p.id}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">NO. IC</label><p>${p.no_ic||'—'}</p></div>
+    <div style="grid-column:1/-1"><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">NAMA PENUH</label><p style="font-weight:600;font-size:15px">${p.nama}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">PROGRAM</label><p>${p.program||'—'}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">SEMESTER MASUK</label><p>${p.semester_masuk||'—'}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">KELAS SEMASA</label><p>${kelas_html}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">SEMESTER SEMASA</label><p>${sem_html}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">STATUS PENGAJIAN</label><p>${lencana_pengajian(p.status_pengajian)}</p></div>
+    <div><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">PENASIHAT AKADEMIK</label><p>${p.nama_pa||'—'}</p></div>
+    ${p.sebab_status?`<div style="grid-column:1/-1"><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">SEBAB STATUS</label><p style="color:var(--oren)">${p.sebab_status}</p></div>`:''}
+    <div style="grid-column:1/-1;border-top:1px solid var(--sempadan);padding-top:14px;margin-top:4px">
+      <label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">STATUS TAKAFUL</label>
+      <p>${lencana_takaful(p.status_takaful)}</p>
+      ${p.tarikh_bayaran?`<p style="font-size:12px;color:var(--kelabu-gelap);margin-top:4px">Tarikh: ${format_tarikh(p.tarikh_bayaran)} &nbsp;|&nbsp; Amaun: ${format_matawang(p.amaun_bayaran)}</p>`:''}
+      ${p.tarikh_disahkan?`<p style="font-size:12px;color:var(--hijau)">Disahkan: ${format_tarikh(p.tarikh_disahkan)}</p>`:''}
+    </div>
+    <div style="grid-column:1/-1"><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">RESIT BAYARAN</label>${resit_html}</div>
+    ${p.catatan?`<div style="grid-column:1/-1"><label style="font-size:11px;color:var(--kelabu-gelap);font-weight:600">CATATAN</label><p style="font-style:italic">${p.catatan}</p></div>`:''}
+  </div>`;
+  tunjuk_modal('modal-profil', 'Profil Pelajar', badan, [`<button class="btn btn-utama" onclick="tutup_modal('modal-profil');buka_edit_pelajar('${id}')">✏️ Edit</button>`,`<button class="btn btn-amaran" onclick="tutup_modal('modal-profil');buka_bayaran_pelajar('${id}')">💳 Rekod Bayaran</button>`,`<button class="btn btn-biasa" onclick="tutup_modal('modal-profil')">Tutup</button>`]);
+}
+
+function buka_tambah_pelajar() { mod_borang='tambah'; id_edit_semasa=null; isi_borang_pelajar({}); tunjuk_modal('modal-borang-pelajar','Tambah Pelajar Baru'); }
+function buka_edit_pelajar(id) { const p=cari_pelajar(id); if(!p) return; mod_borang='edit'; id_edit_semasa=id; isi_borang_pelajar(p); tunjuk_modal('modal-borang-pelajar','Kemaskini Maklumat Pelajar'); }
+
+function isi_borang_pelajar(p) {
+  const val = (id, v) => { const el = document.getElementById(id); if (el) el.value = v||''; };
+  val('f-id',p.id); val('f-nama',p.nama); val('f-no-ic',p.no_ic); val('f-program',p.program);
+  val('f-sem-masuk',p.semester_masuk); val('f-kelas-semasa',p.kelas_semasa); val('f-kelas-asal',p.kelas_asal);
+  val('f-sem-semasa',p.semester_semasa); val('f-sem-asal',p.semester_asal);
+  val('f-status-pengajian',p.status_pengajian||'aktif'); val('f-sebab-status',p.sebab_status);
+  val('f-nama-pa',p.nama_pa); val('f-status-takaful',p.status_takaful||'belum_bayar'); val('f-catatan',p.catatan);
+  togol_medan_tercicir();
+  const el_id = document.getElementById('f-id'); if (el_id) el_id.disabled = (mod_borang === 'edit');
+}
+
+function togol_medan_tercicir() { const s=document.getElementById('f-status-pengajian')?.value; const el=document.getElementById('bahagian-kelas-asal'); if(el) el.style.display=['repeat','extend','junior'].includes(s)?'grid':'none'; }
+
+function simpan_borang_pelajar() {
+  const val = id => document.getElementById(id)?.value?.trim()||'';
+  const rekod = { id:val('f-id').toUpperCase(), nama:val('f-nama'), no_ic:val('f-no-ic'), program:val('f-program').toUpperCase(), semester_masuk:val('f-sem-masuk'), kelas_semasa:val('f-kelas-semasa').toUpperCase(), kelas_asal:val('f-kelas-asal').toUpperCase()||null, semester_semasa:val('f-sem-semasa'), semester_asal:val('f-sem-asal')||null, status_pengajian:val('f-status-pengajian'), sebab_status:val('f-sebab-status'), nama_pa:val('f-nama-pa'), status_takaful:val('f-status-takaful'), catatan:val('f-catatan') };
+  if (!rekod.id || !rekod.nama) { tunjuk_notif('Sila isi No. Matrik dan Nama Pelajar!', 'merah'); return; }
+  if (mod_borang === 'tambah') { const ok=tambah_pelajar(rekod); if(ok){tutup_modal('modal-borang-pelajar');tunjuk_notif('Pelajar berjaya ditambah!','hijau');app.refresh();} }
+  else { kemaskini_pelajar(id_edit_semasa,rekod); tambah_log('KEMASKINI',`Maklumat ${rekod.nama} (${id_edit_semasa}) dikemaskini.`); tutup_modal('modal-borang-pelajar'); tunjuk_notif('Maklumat pelajar dikemaskini!','hijau'); app.refresh(); }
+}
+
+function sahkan_padam(id, nama) { if(!confirm(`Adakah anda pasti mahu memadam rekod ${nama} (${id})?\n\nTindakan ini tidak boleh dibatalkan.`)) return; padam_pelajar(id); tunjuk_notif(`Rekod ${nama} telah dipadam.`,'oren'); app.refresh(); }
+
+function init_halaman_pelajar() {
+  const inp = document.getElementById('carian-pelajar');
+  if (inp) { inp.oninput = e => { penapis_semasa.carian = e.target.value; render_senarai_pelajar(); }; }
+  ['penapis-pengajian','penapis-takaful','penapis-program'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    el.onchange = e => { penapis_semasa[id.replace('penapis-','')] = e.target.value; render_senarai_pelajar(); };
+  });
+  const es = document.getElementById('f-status-pengajian'); if (es) es.onchange = togol_medan_tercicir;
+  render_senarai_pelajar();
+}
+
+/* ============================================================
+   payment.js
+   ============================================================ */
+let _resit_sementara = { data:null, nama:null };
+
+function buka_bayaran_pelajar(id) {
+  const p = cari_pelajar(id); if (!p) return;
+  const badan = `<div class="kotak-amaran biru" style="margin-bottom:18px"><span class="kotak-amaran-ikon">ℹ️</span><div><strong>${p.nama}</strong> — ${p.id}<br>Status semasa: ${lencana_takaful(p.status_takaful)}</div></div>
+    <div class="kumpulan-borang"><label>Tarikh Bayaran</label><input type="date" id="pay-tarikh" class="kawalan-borang" value="${p.tarikh_bayaran?p.tarikh_bayaran.substring(0,10):new Date().toISOString().substring(0,10)}"></div>
+    <div class="kumpulan-borang"><label>Amaun Bayaran (RM)</label><input type="number" id="pay-amaun" class="kawalan-borang" placeholder="cth: 45.00" step="0.01" min="0" value="${p.amaun_bayaran||''}"></div>
+    <div class="kumpulan-borang"><label>Upload Resit (JPG / PNG / PDF — had 500KB)</label>
+      <div class="zon-upload ${p.resit_data?'ada-fail':''}" id="zon-upload-resit" onclick="document.getElementById('inp-resit').click()">
+        <div class="zon-upload-ikon">${p.resit_data?'✅':'📎'}</div>
+        <p id="zon-upload-teks">${p.resit_nama_fail?p.resit_nama_fail:'Klik untuk pilih fail resit'}</p>
+        <small>Saiz maksimum: 500KB</small>
+      </div>
+      <input type="file" id="inp-resit" accept="image/*,.pdf" style="display:none" onchange="proses_upload_resit(this)">
+    </div>`;
+  tunjuk_modal('modal-bayaran',`Rekod Bayaran — ${p.nama}`,badan,[`<button class="btn btn-berjaya" onclick="simpan_bayaran('${id}','tunggu')">💾 Simpan &amp; Tunggu Sahkan</button>`,`<button class="btn btn-utama" onclick="simpan_bayaran('${id}','bayar')">✅ Terus Sahkan</button>`,`<button class="btn btn-biasa" onclick="tutup_modal('modal-bayaran')">Batal</button>`]);
+}
+
+function proses_upload_resit(inp) {
+  const fail = inp.files[0]; if (!fail) return;
+  if (fail.size > 500*1024) { tunjuk_notif('Saiz fail melebihi 500KB. Sila kompres imej terlebih dahulu.','merah'); inp.value=''; return; }
+  const p = new FileReader();
+  p.onload = e => { _resit_sementara.data=e.target.result; _resit_sementara.nama=fail.name; const z=document.getElementById('zon-upload-resit'); const t=document.getElementById('zon-upload-teks'); if(z) z.classList.add('ada-fail'); if(t) t.textContent=`✅ ${fail.name} (${(fail.size/1024).toFixed(1)} KB)`; };
+  p.readAsDataURL(fail);
+}
+
+function simpan_bayaran(id, status_akhir) {
+  const tarikh = document.getElementById('pay-tarikh')?.value;
+  const amaun  = document.getElementById('pay-amaun')?.value;
+  if (!tarikh) { tunjuk_notif('Sila pilih tarikh bayaran!','merah'); return; }
+  const k = { status_takaful:status_akhir, tarikh_bayaran:tarikh, amaun_bayaran:amaun||null, resit_disahkan:status_akhir==='bayar', tarikh_disahkan:status_akhir==='bayar'?new Date().toISOString():null };
+  if (_resit_sementara.data) { k.resit_data=_resit_sementara.data; k.resit_nama_fail=_resit_sementara.nama; }
+  kemaskini_pelajar(id, k); _resit_sementara={data:null,nama:null};
+  const p=cari_pelajar(id); const msg=status_akhir==='bayar'?`Bayaran ${p?.nama} disahkan.`:`Bayaran ${p?.nama} disimpan — menunggu pengesahan.`;
+  tambah_log('BAYARAN',msg); tutup_modal('modal-bayaran'); tunjuk_notif(msg,status_akhir==='bayar'?'hijau':'oren'); app.refresh();
+}
+
+function preview_resit(id) {
+  const p = cari_pelajar(id); if (!p||!p.resit_data) return;
+  if (p.resit_data.startsWith('data:image')) { tunjuk_modal('modal-preview-resit',`Resit — ${p.nama}`,`<img src="${p.resit_data}" style="max-width:100%;border-radius:6px" alt="Resit">`,[`<button class="btn btn-biasa" onclick="tutup_modal('modal-preview-resit')">Tutup</button>`]); }
+  else { const w=window.open(); w.document.write(`<iframe src="${p.resit_data}" width="100%" height="100%" style="border:none"></iframe>`); }
+}
+
+function sahkan_resit(id) { const p=cari_pelajar(id); if(!p) return; kemaskini_pelajar(id,{status_takaful:'bayar',resit_disahkan:true,tarikh_disahkan:new Date().toISOString()}); tambah_log('SAHKAN',`Resit ${p.nama} disahkan.`); tunjuk_notif(`Resit ${p.nama} berjaya disahkan!`,'hijau'); tutup_modal('modal-profil'); app.refresh(); }
+function tolak_resit(id) { const p=cari_pelajar(id); if(!p) return; if(!confirm(`Tolak resit ${p.nama}?`)) return; kemaskini_pelajar(id,{status_takaful:'belum_bayar',resit_data:null,resit_nama_fail:null,resit_disahkan:false,tarikh_bayaran:null,amaun_bayaran:null}); tambah_log('TOLAK',`Resit ${p.nama} ditolak.`); tunjuk_notif(`Resit ${p.nama} ditolak.`,'oren'); app.refresh(); }
+
+function render_halaman_pembayaran() {
+  const senarai=semua_pelajar(); const tunggu=senarai.filter(p=>p.status_takaful==='tunggu'); const belum=senarai.filter(p=>p.status_takaful==='belum_bayar');
+  const el_t=document.getElementById('senarai-tunggu-sahkan'); if(el_t){ set_teks('bil-tunggu-sahkan',tunggu.length); el_t.innerHTML=tunggu.length===0?`<div class="tiada-data"><div class="tiada-data-ikon">✅</div><p>Tiada resit menunggu pengesahan.</p></div>`:tunggu.map(p=>`<div class="item-log"><div style="flex:1"><strong>${p.nama}</strong> <span style="font-size:12px;color:var(--kelabu-gelap)">${p.id}</span><span style="font-size:12px;display:block">Tarikh: ${format_tarikh(p.tarikh_bayaran)} &nbsp;|&nbsp; Amaun: ${format_matawang(p.amaun_bayaran)}</span></div><div style="display:flex;gap:8px;flex-wrap:wrap">${p.resit_data?`<button class="btn btn-biasa btn-kecil" onclick="preview_resit('${p.id}')">👁 Lihat Resit</button>`:''}<button class="btn btn-berjaya btn-kecil" onclick="sahkan_resit('${p.id}')">✅ Sahkan</button><button class="btn btn-bahaya btn-kecil" onclick="tolak_resit('${p.id}')">✗ Tolak</button></div></div>`).join(''); }
+  const el_b=document.getElementById('senarai-belum-bayar-pay'); if(el_b){ set_teks('bil-belum-bayar-pay',belum.length); el_b.innerHTML=belum.length===0?`<div class="tiada-data"><div class="tiada-data-ikon">🎉</div><p>Semua pelajar telah membuat bayaran!</p></div>`:`<div class="jadual-balut"><table class="jadual"><thead><tr><th>No. Matrik</th><th>Nama</th><th>Kelas</th><th>PA</th><th>Tindakan</th></tr></thead><tbody>${belum.map(p=>`<tr><td>${p.id}</td><td><span class="pautan-pelajar" onclick="buka_profil('${p.id}')">${p.nama}</span></td><td>${kelas_paparan(p)}</td><td>${p.nama_pa||'—'}</td><td><button class="btn btn-amaran btn-kecil" onclick="buka_bayaran_pelajar('${p.id}')">💳 Rekod</button></td></tr>`).join('')}</tbody></table></div>`; }
+}
+
+function eksport_belum_bayar_csv() { const s=semua_pelajar().filter(p=>p.status_takaful==='belum_bayar'); if(!s.length){tunjuk_notif('Tiada pelajar belum bayar untuk dieksport.','oren');return;} const b=['No_Matrik,Nama,Program,Kelas_Semasa,Semester,PA']; s.forEach(p=>b.push(`"${p.id}","${p.nama}","${p.program||''}","${p.kelas_semasa||''}","${p.semester_semasa||''}","${p.nama_pa||''}"`)); muat_turun('\uFEFF'+b.join('\r\n'),`belum-bayar-${tarikh_fail()}.csv`,'text/csv;charset=utf-8'); }
+
+/* ============================================================
+   atRisk.js
+   ============================================================ */
+function render_halaman_perhatian() {
+  const s=semua_pelajar(); const k={ belum_bayar:s.filter(p=>p.status_takaful==='belum_bayar'), repeat:s.filter(p=>p.status_pengajian==='repeat'), extend:s.filter(p=>p.status_pengajian==='extend'), junior:s.filter(p=>p.status_pengajian==='junior'), tangguh:s.filter(p=>p.status_pengajian==='tangguh') };
+  set_teks('bil-perhatian-belum',k.belum_bayar.length); set_teks('bil-perhatian-repeat',k.repeat.length); set_teks('bil-perhatian-extend',k.extend.length); set_teks('bil-perhatian-junior',k.junior.length); set_teks('bil-perhatian-tangguh',k.tangguh.length);
+  render_seksyen_risiko('perhatian-belum',k.belum_bayar,'bayar'); render_seksyen_risiko('perhatian-repeat',k.repeat,'pengajian'); render_seksyen_risiko('perhatian-extend',k.extend,'pengajian'); render_seksyen_risiko('perhatian-junior',k.junior,'pengajian'); render_seksyen_risiko('perhatian-tangguh',k.tangguh,'pengajian');
+}
+function render_seksyen_risiko(id_el, senarai, mod) {
+  const el=document.getElementById(id_el); if(!el) return;
+  el.innerHTML=senarai.length===0?`<div style="color:var(--hijau);font-size:13px;padding:8px 0">✓ Tiada pelajar dalam kategori ini.</div>`:`<div class="jadual-balut"><table class="jadual"><thead><tr><th>No. Matrik</th><th>Nama</th><th>Kelas</th><th>PA</th><th>Pengajian</th><th>Takaful</th><th>Tindakan</th></tr></thead><tbody>${senarai.map(p=>`<tr><td>${p.id}</td><td><span class="pautan-pelajar" onclick="buka_profil('${p.id}')">${p.nama}</span></td><td>${kelas_paparan(p)}</td><td>${p.nama_pa||'—'}</td><td>${lencana_pengajian(p.status_pengajian)}</td><td>${lencana_takaful(p.status_takaful)}</td><td><button class="btn btn-biasa btn-kecil" onclick="buka_profil('${p.id}')">👁 Profil</button>${mod==='bayar'?`<button class="btn btn-amaran btn-kecil" onclick="buka_bayaran_pelajar('${p.id}')">💳 Rekod</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ============================================================
+   semesterManager.js
+   ============================================================ */
+let wizard_langkah_semasa=1, preview_naik=[];
+
+function render_halaman_semester() {
+  const sem=dapatkan_semester(); set_teks('sem-nama-semasa',sem.nama); set_teks('sem-tarikh-mula',format_tarikh(sem.tarikh_mula));
+  const log=semua_log().filter(l=>['SEMESTER','SISTEM','IMPORT'].includes(l.jenis));
+  const el=document.getElementById('log-aktiviti');
+  if(el) el.innerHTML=log.length===0?'<div class="tiada-data"><div class="tiada-data-ikon">📋</div><p>Tiada log aktiviti.</p></div>':log.slice(0,30).map(l=>`<div class="item-log"><div class="log-masa">${format_tarikh(l.masa)}</div><div><strong>[${l.jenis}]</strong> ${l.mesej}</div></div>`).join('');
+  const inp=document.getElementById('inp-nama-semester-baru'); if(inp&&!inp.value) inp.value=cadang_semester_seterusnya(sem.nama);
+}
+function cadang_semester_seterusnya(n) { const m=n.match(/Sem\s*(\d+)\s*(\d{4})\/(\d{4})/i); if(!m) return ''; let s=parseInt(m[1]),t1=parseInt(m[2]),t2=parseInt(m[3]); s++; if(s>6){s=1;t1++;t2++;} return `Sem ${s} ${t1}/${t2}`; }
+function naik_kelas(k) { if(!k) return k; return k.replace(/(\d+)/,(_,n)=>parseInt(n)+1); }
+function naik_semester_str(s) { if(!s) return s; const m=s.match(/Sem\s*(\d+)\s*(.+)/i); if(!m) return s; return `Sem ${parseInt(m[1])+1} ${m[2]}`; }
+
+function wizard_semak_preview() {
+  const nama_baru=document.getElementById('inp-nama-semester-baru')?.value?.trim(); if(!nama_baru){tunjuk_notif('Sila masukkan nama semester baru!','merah');return;}
+  const senarai=semua_pelajar(); const aktif=senarai.filter(p=>p.status_pengajian==='aktif'); const tercicir=senarai.filter(p=>['repeat','extend','junior','tangguh'].includes(p.status_pengajian));
+  preview_naik=aktif;
+  const el_auto=document.getElementById('preview-naik-auto'); if(el_auto) el_auto.innerHTML=aktif.length===0?'<p style="color:var(--kelabu-gelap)">Tiada pelajar aktif.</p>':`<div class="jadual-balut"><table class="jadual"><thead><tr><th>No. Matrik</th><th>Nama</th><th>Kelas Lama</th><th>Kelas Baru</th></tr></thead><tbody>${aktif.map(p=>`<tr><td>${p.id}</td><td>${p.nama}</td><td>${p.kelas_semasa}</td><td style="color:var(--biru-cerah);font-weight:600">${naik_kelas(p.kelas_semasa)}</td></tr>`).join('')}</tbody></table></div>`;
+  const el_m=document.getElementById('preview-semak-manual'); if(el_m) el_m.innerHTML=tercicir.length===0?'<p style="color:var(--hijau)">✓ Tiada pelajar yang memerlukan semakan manual.</p>':`<div class="kotak-amaran kuning"><span class="kotak-amaran-ikon">⚠️</span><div>${tercicir.length} pelajar ini TIDAK akan dinaikkan kelas secara automatik:<ul style="margin-top:8px;padding-left:20px">${tercicir.map(p=>`<li><strong>${p.nama}</strong> (${p.id}) — ${p.status_pengajian}</li>`).join('')}</ul></div></div>`;
+  set_teks('preview-bil-aktif',aktif.length); set_teks('preview-bil-manual',tercicir.length); set_teks('preview-nama-semester',nama_baru);
+  tukar_wizard(2);
+}
+
+function wizard_proses_semester() {
+  const nama_baru=document.getElementById('inp-nama-semester-baru')?.value?.trim(); if(!nama_baru) return;
+  semua_pelajar().forEach(p => {
+    const k={status_takaful:'belum_bayar',resit_data:null,resit_nama_fail:null,resit_disahkan:false,tarikh_bayaran:null,amaun_bayaran:null,tarikh_disahkan:null};
+    if(p.status_pengajian==='aktif'){k.kelas_semasa=naik_kelas(p.kelas_semasa);k.kelas_asal=naik_kelas(p.kelas_semasa);k.semester_semasa=nama_baru;k.semester_asal=nama_baru;}
+    else{if(p.kelas_asal)k.kelas_asal=naik_kelas(p.kelas_asal);if(p.semester_asal)k.semester_asal=naik_semester_str(p.semester_asal);}
+    kemaskini_pelajar(p.id,k);
+  });
+  simpan_semester({nama:nama_baru,tarikh_mula:new Date().toISOString()});
+  tambah_log('SEMESTER',`Semester baru dimulakan: ${nama_baru}. ${preview_naik.length} pelajar dinaikkan kelas. Status takaful semua pelajar di-reset.`);
+  tukar_wizard(3); set_teks('selesai-nama-semester',nama_baru); set_teks('selesai-bil-naik',preview_naik.length);
+  app.refresh(); tunjuk_notif(`Semester baru ${nama_baru} berjaya dimulakan!`,'hijau');
+}
+
+function tukar_wizard(l) { wizard_langkah_semasa=l; document.querySelectorAll('.wizard-item').forEach((e,i)=>{e.classList.toggle('aktif',i+1===l);e.classList.toggle('selesai',i+1<l);}); document.querySelectorAll('.wizard-panel').forEach((e,i)=>e.classList.toggle('aktif',i+1===l)); }
+function wizard_semula() { tukar_wizard(1); preview_naik=[]; }
+
+/* ============================================================
+   app.js — Navigasi & Utiliti UI
+   ============================================================ */
+function navigasi(id) {
+  document.querySelectorAll('.halaman').forEach(e=>e.classList.remove('aktif'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('aktif'));
+  const el=document.getElementById('halaman-'+id); if(el) el.classList.add('aktif');
+  const en=document.querySelector(`.nav-item[data-halaman="${id}"]`); if(en) en.classList.add('aktif');
+  switch(id){case 'dashboard':render_dashboard();break;case 'pelajar':init_halaman_pelajar();break;case 'pembayaran':render_halaman_pembayaran();break;case 'perhatian':render_halaman_perhatian();break;case 'semester':render_halaman_semester();break;}
+  kemaskini_lencana_sidebar();
+}
+
+function kemaskini_lencana_sidebar() {
+  const s=semua_pelajar(); const bp=s.filter(p=>p.status_takaful==='belum_bayar'||['repeat','extend','junior'].includes(p.status_pengajian)).length; const bt=s.filter(p=>p.status_takaful==='tunggu').length;
+  const ep=document.getElementById('lencana-perhatian'); const et=document.getElementById('lencana-tunggu');
+  if(ep){ep.textContent=bp;ep.style.display=bp?'inline':'none';} if(et){et.textContent=bt;et.style.display=bt?'inline':'none';}
+}
+
+function set_teks(id, val) { const e=document.getElementById(id); if(e) e.textContent=val; }
+
+function tunjuk_notif(mesej, jenis='hijau') {
+  let el=document.getElementById('notifikasi-global');
+  if(!el){el=document.createElement('div');el.id='notifikasi-global';el.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;max-width:360px;font-size:13px;font-weight:500;border-radius:8px;padding:12px 18px;box-shadow:0 4px 16px rgba(0,0,0,0.15);transition:opacity 0.3s';document.body.appendChild(el);}
+  const w={hijau:'#27ae60',merah:'#e74c3c',oren:'#e67e22',biru:'#2980b9'};
+  el.style.background=w[jenis]||w.hijau;el.style.color='#fff';el.style.opacity='1';el.textContent=mesej;
+  clearTimeout(el._timer);el._timer=setTimeout(()=>{el.style.opacity='0';},3500);
+}
+
+function tunjuk_modal(id, tajuk, badan_html, butang_arr) {
+  let el=document.getElementById(id);
+  if(!el){el=document.createElement('div');el.id=id;el.className='modal-latar';el.innerHTML=`<div class="modal-kotak"><div class="modal-kepala"><h3 class="modal-tajuk-teks"></h3><button class="modal-tutup" onclick="tutup_modal('${id}')">✕</button></div><div class="modal-badan"></div><div class="modal-kaki"></div></div>`;document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el)tutup_modal(id);});}
+  el.querySelector('.modal-tajuk-teks').textContent=tajuk;
+  el.querySelector('.modal-badan').innerHTML=badan_html;
+  el.querySelector('.modal-kaki').innerHTML=(butang_arr||[]).join('');
+  el.classList.add('buka'); document.body.style.overflow='hidden';
+}
+
+function tutup_modal(id) { const el=document.getElementById(id); if(el) el.classList.remove('buka'); document.body.style.overflow=''; }
+
+function togol_seksyen(id) { const el=document.getElementById(id); if(!el) return; el.style.display=(el.style.display==='none')?'block':'none'; }
+
+window.app = { refresh() { const id=document.querySelector('.nav-item.aktif')?.dataset.halaman||'dashboard'; navigasi(id); } };
+
+function buka_import_json() { document.getElementById('inp-import-json')?.click(); }
+function proses_import_json(inp) { const fail=inp.files[0]; if(!fail) return; import_json(fail,(ok,bil)=>{ok?tunjuk_notif(`Import berjaya! ${bil} rekod dimuatkan.`,'hijau'):tunjuk_notif('Import gagal. Sila semak format fail JSON.','merah');app.refresh();inp.value='';}); }
+function buka_import_csv_bayaran() { document.getElementById('inp-import-csv')?.click(); }
+function proses_import_csv(inp) { const fail=inp.files[0]; if(!fail) return; import_csv_bayaran(fail,(dk,g)=>{tunjuk_notif(`CSV bayaran diimport: ${dk} rekod dikemas, ${g} gagal.`,dk>0?'hijau':'oren');app.refresh();inp.value='';}); }
+
+// Muat
+document.addEventListener('DOMContentLoaded', () => {
+  muat_data_contoh_jika_kosong();
+  navigasi('dashboard');
+  ['inp-import-json','inp-import-csv'].forEach(id => {
+    if(!document.getElementById(id)){const inp=document.createElement('input');inp.type='file';inp.id=id;inp.style.display='none';if(id==='inp-import-json'){inp.accept='.json';inp.onchange=()=>proses_import_json(inp);}if(id==='inp-import-csv'){inp.accept='.csv';inp.onchange=()=>proses_import_csv(inp);}document.body.appendChild(inp);}
+  });
+  function semak_saiz(){const b=document.getElementById('btn-toggle-sidebar');if(b)b.style.display=window.innerWidth<900?'block':'none';}
+  window.addEventListener('resize',semak_saiz);semak_saiz();
+});
+</script>
 </body>
 </html>
